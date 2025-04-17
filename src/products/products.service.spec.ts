@@ -2,11 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsService } from './products.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
-import { Repository } from 'typeorm';
 
 describe('ProductsService', () => {
   let service: ProductsService;
-  let repository: Repository<Product>;
 
   const mockProduct = {
     id: 1,
@@ -36,9 +34,8 @@ describe('ProductsService', () => {
     }).compile();
 
     service = module.get<ProductsService>(ProductsService);
-    repository = module.get<Repository<Product>>(getRepositoryToken(Product));
+    service = module.get<ProductsService>(ProductsService);
   });
-
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
@@ -50,26 +47,26 @@ describe('ProductsService', () => {
       price: 100,
     };
     const result = await service.create(createProductDto);
-    expect(repository.create).toHaveBeenCalledWith(createProductDto);
-    expect(repository.save).toHaveBeenCalledWith(mockProduct);
+    expect(mockRepository.create).toHaveBeenCalledWith(createProductDto);
+    expect(mockRepository.save).toHaveBeenCalledWith(mockProduct);
     expect(result).toEqual(mockProduct);
   });
 
   it('should return all products', async () => {
     const result = await service.findAll();
-    expect(repository.find).toHaveBeenCalled();
+    expect(mockRepository.find).toHaveBeenCalled();
     expect(result).toEqual([mockProduct]);
   });
 
   it('should return a product by ID', async () => {
     const result = await service.findOne(1);
-    expect(repository.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
+    expect(mockRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
     expect(result).toEqual(mockProduct);
   });
 
   it('should delete a product by ID', async () => {
     const result = await service.remove(1);
-    expect(repository.delete).toHaveBeenCalledWith(1);
+    expect(mockRepository.delete).toHaveBeenCalledWith(1);
     expect(result).toBe(true);
   });
 });
