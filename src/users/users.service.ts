@@ -8,12 +8,12 @@ export class UsersService {
   private readonly users = [
     {
       userId: 1,
-      username: 'john',
-      password: 'john',
+      username: 'johep',
+      password: 'gradis',
     },
     {
       userId: 2,
-      username: 'maria',
+      username: 'roxana',
       password: 'guess',
     },
   ];
