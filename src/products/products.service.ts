@@ -1,64 +1,45 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
 
 @Injectable()
 export class ProductsService {
-  private products: Product[] = [];
-  private idCounter = 1;
+  constructor(
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
+  ) {}
 
-  create(createProductDto: CreateProductDto) {
-    // This method should create a new product and return it
-    const newProduct: Product = {
-      id: this.idCounter++,
-      ...createProductDto,
-      createdAt: new Date(),
-    };
-    this.products.push(newProduct);
-    return newProduct;
+  async create(createProductDto: CreateProductDto): Promise<Product> {
+    const newProduct = this.productRepository.create(createProductDto);
+    return await this.productRepository.save(newProduct);
   }
 
-  findAll(): Product[] {
-    // This method should return all products
-    return this.products;
+  async findAll(): Promise<Product[]> {
+    return await this.productRepository.find();
   }
 
-  findOne(id: number): Product {
-    // This method should return a product by its ID
-    // If the product is not found, it should throw an error
-    const product = this.products.find((product) => product.id === id);
+  async findOne(id: number): Promise<Product> {
+    const product = await this.productRepository.findOne({ where: { id } });
     if (!product) {
       throw new Error(`Product with id ${id} not found`);
     }
     return product;
   }
 
-  update(id: number, updateProductDto: UpdateProductDto): Product {
-    // This method should update a product by its ID and return the updated product
-    // If the product is not found, it should throw an error
-    const productIndex = this.products.findIndex(
-      (product) => product.id === id,
-    );
-    if (productIndex === -1) {
-      throw new Error(`Product with id ${id} not found`);
-    }
-    // Merge the existing product with the updated data
-    this.products[productIndex] = {
-      ...this.products[productIndex],
-      ...updateProductDto,
-    };
-    return this.products[productIndex];
+  async update(
+    id: number,
+    updateProductDto: UpdateProductDto,
+  ): Promise<Product> {
+    const product = await this.findOne(id);
+    const updatedProduct = { ...product, ...updateProductDto };
+    return await this.productRepository.save(updatedProduct);
   }
 
-  remove(id: number): boolean {
-    // This method should remove a product by its ID and return true if successful
-    const productIndex = this.products.findIndex(
-      (product) => product.id === id,
-    );
-    if (productIndex === -1) return false;
-
-    this.products.splice(productIndex, 1);
-    return true;
+  async remove(id: number): Promise<boolean> {
+    const result = await this.productRepository.delete(id);
+    return (result.affected ?? 0) > 0;
   }
 }
