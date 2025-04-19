@@ -1,0 +1,5 @@
+{
+    "dataworkspace.excludedProjects": [
+        "backend_assessment/backend_assessment.sqlproj"
+    ]
+}
